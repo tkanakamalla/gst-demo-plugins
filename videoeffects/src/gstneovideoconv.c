@@ -107,7 +107,8 @@ gst_neovideoconv_class_init (GstNeovideoconvClass * klass)
           gst_caps_from_string (VIDEO_SINK_CAPS)));
 
   gst_element_class_set_static_metadata (GST_ELEMENT_CLASS (klass),
-      "Simple element to convert RGB frame to GRAY8", "Generic", "Demostration of transform element to convert RGB to GRAY8",
+      "Simple element to convert RGB frame to GRAY8", "Generic",
+      "Demostration of transform element to convert RGB to GRAY8",
       "taruntejk@live.com");
 
   gobject_class->set_property = gst_neovideoconv_set_property;
@@ -364,25 +365,28 @@ gst_neovideoconv_transform_caps (GstBaseTransform * trans,
 {
 
   GstNeovideoconv *neovideoconv = GST_NEOVIDEOCONV (trans);
-  GstVideoFormat src_format = GST_VIDEO_FORMAT_GRAY8, sink_format = GST_VIDEO_FORMAT_RGB;
+  GstVideoFormat src_format = GST_VIDEO_FORMAT_GRAY8, sink_format =
+      GST_VIDEO_FORMAT_RGB;
 
   GST_DEBUG_OBJECT (neovideoconv, "%s", __func__);
   GstCaps *ret_caps = NULL, *temp_caps;
-  GST_ERROR_OBJECT (neovideoconv, "received caps : %s",
-      gst_caps_to_string (caps));
+  GST_ERROR_OBJECT (neovideoconv, "received caps %p : %" GST_PTR_FORMAT, caps,
+      caps);
   //check the pad direction SRC or SINK
   if (direction == GST_PAD_SINK) {
     //return SRC caps;
-    temp_caps = gst_caps_copy(caps);
+    temp_caps = gst_caps_copy (caps);
     gst_caps_set_simple (temp_caps, "format", G_TYPE_STRING,
-      gst_video_format_to_string (src_format), NULL);
-    GST_ERROR_OBJECT (neovideoconv, "%s temp src caps are %" GST_PTR_FORMAT , __func__, temp_caps);
+        gst_video_format_to_string (src_format), NULL);
+    GST_ERROR_OBJECT (neovideoconv, "%s temp src caps are %" GST_PTR_FORMAT,
+        __func__, temp_caps);
   } else {
     //return SINK caps
-    temp_caps = gst_caps_copy(caps);
+    temp_caps = gst_caps_copy (caps);
     gst_caps_set_simple (temp_caps, "format", G_TYPE_STRING,
-      gst_video_format_to_string (sink_format), NULL);
-    GST_ERROR_OBJECT (neovideoconv, "%s temp sink caps are %" GST_PTR_FORMAT , __func__, temp_caps);
+        gst_video_format_to_string (sink_format), NULL);
+    GST_ERROR_OBJECT (neovideoconv, "%s temp sink caps are %" GST_PTR_FORMAT,
+        __func__, temp_caps);
   }
 
   if (filter) {
@@ -390,12 +394,13 @@ gst_neovideoconv_transform_caps (GstBaseTransform * trans,
         gst_caps_to_string (filter));
     ret_caps =
         gst_caps_intersect_full (temp_caps, filter, GST_CAPS_INTERSECT_FIRST);
+    gst_caps_unref (temp_caps);
   } else {
     ret_caps = temp_caps;
   }
 
-  GST_ERROR_OBJECT (neovideoconv, "caps: %" GST_PTR_FORMAT, ret_caps);
+  GST_ERROR_OBJECT (neovideoconv, "caps %p : %" GST_PTR_FORMAT, ret_caps,
+      ret_caps);
 
   return ret_caps;
 }
-

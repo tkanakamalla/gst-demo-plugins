@@ -24,13 +24,11 @@
 #include <gst/video/gstvideofilter.h>
 
 G_BEGIN_DECLS
-
 #define GST_TYPE_NEOVIDEOCONV   (gst_neovideoconv_get_type())
 #define GST_NEOVIDEOCONV(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_NEOVIDEOCONV,GstNeovideoconv))
 #define GST_NEOVIDEOCONV_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_NEOVIDEOCONV,GstNeovideoconvClass))
 #define GST_IS_NEOVIDEOCONV(obj)   (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_NEOVIDEOCONV))
 #define GST_IS_NEOVIDEOCONV_CLASS(obj)   (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_NEOVIDEOCONV))
-
 typedef struct _GstNeovideoconv GstNeovideoconv;
 typedef struct _GstNeovideoconvClass GstNeovideoconvClass;
 
@@ -48,5 +46,4 @@ struct _GstNeovideoconvClass
 GType gst_neovideoconv_get_type (void);
 
 G_END_DECLS
-
 #endif

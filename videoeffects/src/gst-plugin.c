@@ -25,7 +25,7 @@
  *
  *
  */
- 
+
 #include "gstneovideoconv.h"
 #ifndef VERSION
 #define VERSION "0.0.1"
@@ -43,10 +43,10 @@
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
-    gboolean ret = FALSE;
-    ret |= gst_element_register (plugin, "neovideoconv", GST_RANK_NONE,
+  gboolean ret = FALSE;
+  ret |= gst_element_register (plugin, "neovideoconv", GST_RANK_NONE,
       GST_TYPE_NEOVIDEOCONV);
-    return ret;
+  return ret;
 }
 
 
