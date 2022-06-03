@@ -27,18 +27,31 @@
  */
  
 #include "gstneovideoconv.h"
+#ifndef VERSION
+#define VERSION "0.0.1"
+#endif
+#ifndef PACKAGE
+#define PACKAGE "gst_demo_plugins_package"
+#endif
+#ifndef PACKAGE_NAME
+#define PACKAGE_NAME "gst_demo_plugins_package_name"
+#endif
+#ifndef GST_PACKAGE_ORIGIN
+#define GST_PACKAGE_ORIGIN "https://github.com/tkanakamalla/gst-demo-plugins"
+#endif
 
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
-
-  return gst_element_register (plugin, "neovideoconv", GST_RANK_NONE,
+    gboolean ret = FALSE;
+    ret |= gst_element_register (plugin, "neovideoconv", GST_RANK_NONE,
       GST_TYPE_NEOVIDEOCONV);
+    return ret;
 }
 
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    neovideoconv,
-    "FIXME plugin description",
+    videoeffects,
+    "Yet another tiny plugins for video effects",
     plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)

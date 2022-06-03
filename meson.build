@@ -12,12 +12,12 @@ gst_dep = dependency('gstreamer-1.0', version : '>=1.20',
     required : true, fallback : ['gstreamer', 'gst_dep'])
 gstbase_dep = dependency('gstreamer-base-1.0', version : '>=1.20',
   fallback : ['gstreamer', 'gst_base_dep'])
-gstbad_dep = dependency('gstreamer-bad-1.0', version : '>=1.20',
+gstbad_dep = dependency('gstreamer-plugins-bad-1.0', version : '>=1.20',
   fallback : ['gstreamer', 'gst_bad_dep'])
-gstgood_dep = dependency('gstreamer-good-1.0', version : '>=1.20',
-  fallback : ['gstreamer', 'gst_good_dep'])
-gstgood_dep = dependency('gstreamer-good-1.0', version : '>=1.20',
-  fallback : ['gstreamer', 'gst_good_dep'])
+
+#FIXME: unable to gstreamer-good-1.0.pc. Need to find out
+#gstgood_dep = dependency('gstreamer-plugins-good-1.0', version : '>=1.20',
+#  fallback : ['gstreamer', 'gst_good_dep'])
 
 gstaudio_dep = dependency('gstreamer-audio-1.0',
   fallback : ['gst-plugins-base', 'audio_dep'])

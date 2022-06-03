@@ -107,8 +107,8 @@ gst_neovideoconv_class_init (GstNeovideoconvClass * klass)
           gst_caps_from_string (VIDEO_SINK_CAPS)));
 
   gst_element_class_set_static_metadata (GST_ELEMENT_CLASS (klass),
-      "FIXME Long name", "Generic", "FIXME Description",
-      "FIXME <fixme@example.com>");
+      "Simple element to convert RGB frame to GRAY8", "Generic", "Demostration of transform element to convert RGB to GRAY8",
+      "taruntejk@live.com");
 
   gobject_class->set_property = gst_neovideoconv_set_property;
   gobject_class->get_property = gst_neovideoconv_get_property;
