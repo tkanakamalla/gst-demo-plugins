@@ -8,8 +8,8 @@ Pre-requisites:
 Build Commands:
 ===============
 
- meson <builddir>
- ninja -C <builddir>
+ meson builddir
+ ninja -C builddir
 
 Tests (uninstalled):
 ====================
