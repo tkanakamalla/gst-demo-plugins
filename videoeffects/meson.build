@@ -1,6 +1,6 @@
 videoeffects_sources = [
     'src/gst-plugin.c',
-    'src/gstvideoconv.c'
+    'src/gstneovideoconv.c'
 ]
 gstvideoeffects = library('gstvideoeffects',
     videoeffects_sources,

@@ -24,9 +24,9 @@
  * <refsect2>
  * <title>Example launch line</title>
  * |[
- * gst-launch-1.0 -v fakesrc ! neovideoconv ! FIXME ! fakesink
+ * gst-launch-1.0 -v videotestsrc  !  neovideoconv  !  video/x-raw,width=1920,height=1440,framerate=30/1 ! videoconvert ! autovideosink 
  * ]|
- * FIXME Describe what the pipeline does.
+ * Converts the colorscale video to grayscale with GRAY8 format.
  * </refsect2>
  */
 
@@ -77,14 +77,10 @@ enum
 
 /* pad templates */
 
-/* FIXME: add/remove formats you can handle */
 #define VIDEO_SRC_CAPS \
     GST_VIDEO_CAPS_MAKE("GRAY8")
-    //GST_VIDEO_CAPS_MAKE("{ I420, Y444, Y42B, UYVY, RGBA }")
-/* FIXME: add/remove formats you can handle */
 #define VIDEO_SINK_CAPS \
     GST_VIDEO_CAPS_MAKE("RGB")
-    //GST_VIDEO_CAPS_MAKE("{ I420, Y444, Y42B, UYVY, RGBA }")
 
 /* class initialization */
 
@@ -403,35 +399,3 @@ gst_neovideoconv_transform_caps (GstBaseTransform * trans,
   return ret_caps;
 }
 
-static gboolean
-plugin_init (GstPlugin * plugin)
-{
-
-  /* FIXME Remember to set the rank if it's an element that is meant
-     to be autoplugged by decodebin. */
-  return gst_element_register (plugin, "neovideoconv", GST_RANK_NONE,
-      GST_TYPE_NEOVIDEOCONV);
-}
-
-/* FIXME: these are normally defined by the GStreamer build system.
-   If you are creating an element to be included in gst-plugins-*,
-   remove these, as they're always defined.  Otherwise, edit as
-   appropriate for your external plugin package. */
-#ifndef VERSION
-#define VERSION "0.0.FIXME"
-#endif
-#ifndef PACKAGE
-#define PACKAGE "FIXME_package"
-#endif
-#ifndef PACKAGE_NAME
-#define PACKAGE_NAME "FIXME_package_name"
-#endif
-#ifndef GST_PACKAGE_ORIGIN
-#define GST_PACKAGE_ORIGIN "http://FIXME.org/"
-#endif
-
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    neovideoconv,
-    "FIXME plugin description",
-    plugin_init, VERSION, "LGPL", PACKAGE_NAME, GST_PACKAGE_ORIGIN)

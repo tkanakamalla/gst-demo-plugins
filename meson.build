@@ -22,4 +22,7 @@ gstgood_dep = dependency('gstreamer-good-1.0', version : '>=1.20',
 gstaudio_dep = dependency('gstreamer-audio-1.0',
   fallback : ['gst-plugins-base', 'audio_dep'])
 
+gstvideo_dep = dependency('gstreamer-video-1.0',
+    method : 'pkg-config')
+
 subdir('videoeffects')
