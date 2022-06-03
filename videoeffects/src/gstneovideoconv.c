@@ -78,7 +78,7 @@ enum
 /* pad templates */
 
 #define VIDEO_SRC_CAPS \
-    GST_VIDEO_CAPS_MAKE("GRAY8")
+    GST_VIDEO_CAPS_MAKE("{ GRAY8, RGB }")
 #define VIDEO_SINK_CAPS \
     GST_VIDEO_CAPS_MAKE("RGB")
 
@@ -119,6 +119,7 @@ gst_neovideoconv_class_init (GstNeovideoconvClass * klass)
   base_transform_class->stop = GST_DEBUG_FUNCPTR (gst_neovideoconv_stop);
   base_transform_class->transform_caps =
       GST_DEBUG_FUNCPTR (gst_neovideoconv_transform_caps);
+  base_transform_class->transform_ip_on_passthrough = FALSE;
   video_filter_class->set_info = GST_DEBUG_FUNCPTR (gst_neovideoconv_set_info);
   video_filter_class->transform_frame =
       GST_DEBUG_FUNCPTR (gst_neovideoconv_transform_frame);
@@ -212,11 +213,13 @@ gst_neovideoconv_set_info (GstVideoFilter * filter, GstCaps * incaps,
 {
   GstNeovideoconv *neovideoconv = GST_NEOVIDEOCONV (filter);
 
-  GST_ERROR_OBJECT (neovideoconv, "set_info");
-  GST_ERROR_OBJECT (neovideoconv, " in info %d x %d", in_info->width,
-      in_info->height);
-  GST_ERROR_OBJECT (neovideoconv, " out info %d x %d", out_info->width,
-      out_info->height);
+  GST_DEBUG_OBJECT(neovideoconv, "in caps : %" GST_PTR_FORMAT, incaps);
+  GST_DEBUG_OBJECT(neovideoconv, "out caps : %" GST_PTR_FORMAT, outcaps);
+
+  if (GST_VIDEO_FORMAT_INFO_FORMAT(in_info->finfo) == GST_VIDEO_FORMAT_INFO_FORMAT(out_info->finfo)) {
+    //set as passthrough
+    gst_base_transform_set_passthrough (GST_BASE_TRANSFORM(filter), TRUE);
+  }
 
 
   return TRUE;
@@ -229,27 +232,12 @@ gst_neovideoconv_transform_frame (GstVideoFilter * filter,
 {
   GstNeovideoconv *neovideoconv = GST_NEOVIDEOCONV (filter);
 
-  // GST_INFO_OBJECT (neovideoconv, "transform_frame %p %p", inframe, outframe);
-  // GST_INFO_OBJECT (neovideoconv, "No of planes in inframe: %d",
-  //     GST_VIDEO_FRAME_N_PLANES (inframe));
-  // GST_INFO_OBJECT (neovideoconv, "No of Components in inframe: %d",
-  //     GST_VIDEO_FRAME_N_COMPONENTS (inframe));
-  // GST_INFO_OBJECT (neovideoconv, "Inframe %d x %d, %lu",
-  //     GST_VIDEO_FRAME_WIDTH (inframe), GST_VIDEO_FRAME_HEIGHT (inframe),
-  //     GST_VIDEO_FRAME_SIZE (inframe));
-  // GST_INFO_OBJECT (neovideoconv, "No of planes in outframe: %d",
-  //     GST_VIDEO_FRAME_N_PLANES (outframe));
-  // GST_INFO_OBJECT (neovideoconv, "No of Components in outframe: %d",
-  //     GST_VIDEO_FRAME_N_COMPONENTS (outframe));
-  // GST_INFO_OBJECT (neovideoconv, "Outframe %d x %d, %lu",
-  //     GST_VIDEO_FRAME_WIDTH (outframe), GST_VIDEO_FRAME_HEIGHT (outframe),
-  //     GST_VIDEO_FRAME_SIZE (outframe));
-
-  gint i, j;
+  GST_INFO_OBJECT (neovideoconv, "transform_frame %p %p", inframe, outframe);
+  gint row, col;
   gint pixel_stride, row_stride, row_wrap;
   gint d_pixel_stride, d_row_stride, d_row_wrap;
-  guint32 r, g, b;
-  guint32 y;
+  guint8 r, g, b;
+  guint8 y;
   gint s_offsets[3], d_offsets[3];
   guint8 *src, *dest;
 
@@ -265,35 +253,26 @@ gst_neovideoconv_transform_frame (GstVideoFilter * filter,
   d_offsets[GST_VIDEO_COMP_Y] =
       GST_VIDEO_FRAME_COMP_POFFSET (outframe, GST_VIDEO_COMP_Y);
 
-  // GST_ERROR_OBJECT (neovideoconv,
-  //     "src: %p, s_offsets[GST_VIDEO_COMP_R]: %d, s_offsets[GST_VIDEO_COMP_G]: %d,s_offsets[GST_VIDEO_COMP_B]: %d",
-  //     src, s_offsets[GST_VIDEO_COMP_R], s_offsets[GST_VIDEO_COMP_G],
-  //     s_offsets[GST_VIDEO_COMP_B]);
-  // GST_ERROR_OBJECT (neovideoconv, "dest: %p, d_offsets[GST_VIDEO_COMP_Y]: %d",
-  //     dest, d_offsets[GST_VIDEO_COMP_Y]);
   row_stride = GST_VIDEO_FRAME_PLANE_STRIDE (inframe, 0);
   pixel_stride = GST_VIDEO_FRAME_COMP_PSTRIDE (inframe, 0);
   row_wrap = row_stride - pixel_stride * inframe->info.width;
 
-  // GST_ERROR_OBJECT (neovideoconv,
-  //     "src row_stride %d, pixel_stride %d, row_wrap %d ", row_stride,
-  //     pixel_stride, row_wrap);
-
-
   d_row_stride = GST_VIDEO_FRAME_PLANE_STRIDE (outframe, 0);
   d_pixel_stride = GST_VIDEO_FRAME_COMP_PSTRIDE (outframe, 0);
   d_row_wrap = d_row_stride - d_pixel_stride * outframe->info.width;
-  // GST_ERROR_OBJECT (neovideoconv,
-  //     "dest d_row_stride %d, d_pixel_stride %d, d_row_wrap %d ", d_row_stride,
-  //     d_pixel_stride, d_row_wrap);
 
   if (outframe->info.finfo->format == GST_VIDEO_FORMAT_GRAY8) {
-    for (int i = 0; i < inframe->info.height; i++) {
-      for (int j = 0; j < inframe->info.width; j++) {
+    for (int row = 0; row < inframe->info.height; row++) {
+      for (int col = 0; col < inframe->info.width; col++) {
         r = src[s_offsets[GST_VIDEO_COMP_R]];
         g = src[s_offsets[GST_VIDEO_COMP_G]];
         b = src[s_offsets[GST_VIDEO_COMP_B]];
-        y = (r + g + b) / 3;
+        /*Lightness method*/
+        //y = (MIN(r, MIN(g, b)) + MAX(r, MAX(g,b)))/2;
+        /*Average method*/
+        //y = (r + g + b) / 3;
+        /*Luminosity Method*/
+        y = 0.3*r + 0.59*g + 0.11*b;
         dest[d_offsets[GST_VIDEO_COMP_Y]] = y;
         src += pixel_stride;
         dest += d_pixel_stride;
@@ -310,52 +289,6 @@ gst_neovideoconv_transform_frame_ip (GstVideoFilter * filter,
   GstNeovideoconv *neovideoconv = GST_NEOVIDEOCONV (filter);
 
   GST_DEBUG_OBJECT (neovideoconv, "transform_frame_ip");
-  GST_INFO_OBJECT (neovideoconv, "No of planes in inframe: %d",
-      GST_VIDEO_FRAME_N_PLANES (inframe));
-  GST_INFO_OBJECT (neovideoconv, "No of Components in inframe: %d",
-      GST_VIDEO_FRAME_N_COMPONENTS (inframe));
-  GST_INFO_OBJECT (neovideoconv, "Inframe %d x %d, %lu",
-      GST_VIDEO_FRAME_WIDTH (inframe), GST_VIDEO_FRAME_HEIGHT (inframe),
-      GST_VIDEO_FRAME_SIZE (inframe));
-  gint i, j;
-  gint pixel_stride, row_stride, row_wrap;
-  guint32 r, g, b;
-  guint32 grey;
-  gint s_offsets[3];
-  guint8 *src;
-
-  src = GST_VIDEO_FRAME_PLANE_DATA (inframe, 0);
-
-  s_offsets[0] = GST_VIDEO_FRAME_COMP_POFFSET (inframe, 0);
-  s_offsets[1] = GST_VIDEO_FRAME_COMP_POFFSET (inframe, 1);
-  s_offsets[2] = GST_VIDEO_FRAME_COMP_POFFSET (inframe, 2);
-
-
-  row_stride = GST_VIDEO_FRAME_PLANE_STRIDE (inframe, 0);
-  pixel_stride = GST_VIDEO_FRAME_COMP_PSTRIDE (inframe, 0);
-  row_wrap = row_stride - pixel_stride * inframe->info.width;
-
-
-  //if (outframe->info.finfo->format == GST_VIDEO_FORMAT_GRAY8) {
-  {
-    for (int i = 0; i < inframe->info.height; i++) {
-      for (int j = 0; j < inframe->info.width; j++) {
-        //GST_INFO_OBJECT(neovideoconv, "iter %d %d",i,j);
-        r = src[s_offsets[0]];
-        g = src[s_offsets[1]];
-        b = src[s_offsets[2]];
-        grey = (r + g + b) / 3;
-        src[s_offsets[0]] = grey;
-        src[s_offsets[0]] = grey;
-        src[s_offsets[0]] = grey;
-        src += pixel_stride;
-
-      }
-      src += row_wrap;
-    }
-  }
-
-
   return GST_FLOW_OK;
 }
 
@@ -365,27 +298,35 @@ gst_neovideoconv_transform_caps (GstBaseTransform * trans,
 {
 
   GstNeovideoconv *neovideoconv = GST_NEOVIDEOCONV (trans);
-  GstVideoFormat src_format = GST_VIDEO_FORMAT_GRAY8, sink_format =
-      GST_VIDEO_FORMAT_RGB;
-
+  GValue v_formats = G_VALUE_INIT;
   GST_DEBUG_OBJECT (neovideoconv, "%s", __func__);
   GstCaps *ret_caps = NULL, *temp_caps;
-  GST_ERROR_OBJECT (neovideoconv, "received caps %p : %" GST_PTR_FORMAT, caps,
+  GST_DEBUG_OBJECT (neovideoconv, "received caps %p : %" GST_PTR_FORMAT, caps,
       caps);
   //check the pad direction SRC or SINK
   if (direction == GST_PAD_SINK) {
     //return SRC caps;
     temp_caps = gst_caps_copy (caps);
-    gst_caps_set_simple (temp_caps, "format", G_TYPE_STRING,
-        gst_video_format_to_string (src_format), NULL);
-    GST_ERROR_OBJECT (neovideoconv, "%s temp src caps are %" GST_PTR_FORMAT,
+    GValue item = G_VALUE_INIT;
+    gst_value_list_init (&v_formats, 2);
+    g_value_init (&item, G_TYPE_STRING);
+    g_value_set_string (&item, gst_video_format_to_string (GST_VIDEO_FORMAT_RGB));
+    gst_value_list_append_value (&v_formats, &item);
+    g_value_unset (&item);
+    g_value_init (&item, G_TYPE_STRING);
+    g_value_set_string (&item, gst_video_format_to_string (GST_VIDEO_FORMAT_GRAY8));
+    gst_value_list_append_value (&v_formats, &item);
+    g_value_unset (&item);
+    gst_caps_set_value (temp_caps, "format", &v_formats);
+    g_value_unset (&v_formats);
+    GST_DEBUG_OBJECT (neovideoconv, "%s temp src caps are %" GST_PTR_FORMAT,
         __func__, temp_caps);
   } else {
     //return SINK caps
     temp_caps = gst_caps_copy (caps);
     gst_caps_set_simple (temp_caps, "format", G_TYPE_STRING,
-        gst_video_format_to_string (sink_format), NULL);
-    GST_ERROR_OBJECT (neovideoconv, "%s temp sink caps are %" GST_PTR_FORMAT,
+        gst_video_format_to_string (GST_VIDEO_FORMAT_RGB), NULL);
+    GST_DEBUG_OBJECT (neovideoconv, "%s temp sink caps are %" GST_PTR_FORMAT,
         __func__, temp_caps);
   }
 
@@ -399,7 +340,7 @@ gst_neovideoconv_transform_caps (GstBaseTransform * trans,
     ret_caps = temp_caps;
   }
 
-  GST_ERROR_OBJECT (neovideoconv, "caps %p : %" GST_PTR_FORMAT, ret_caps,
+  GST_DEBUG_OBJECT (neovideoconv, "caps %p : %" GST_PTR_FORMAT, ret_caps,
       ret_caps);
 
   return ret_caps;

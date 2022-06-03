@@ -28,7 +28,7 @@
 
 #include "gstneovideoconv.h"
 #ifndef VERSION
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 #endif
 #ifndef PACKAGE
 #define PACKAGE "gst_demo_plugins_package"
