@@ -14,5 +14,5 @@ ninja -C builddir
 Tests (uninstalled):
 ====================
 ``` 
-env GST_PLUGIN_PATH=build/videoeffects gst-launch-1.0 videotestsrc ! neovideoconv ! video/x-raw,width=1920,height=1440,framerate=30/1 ! videoconvert ! autovideosink
+env GST_PLUGIN_PATH=builddir/videoeffects gst-launch-1.0 videotestsrc ! neovideoconv ! video/x-raw,width=1920,height=1440,framerate=30/1 ! videoconvert ! autovideosink
 ```
