@@ -26,3 +26,4 @@ gstvideo_dep = dependency('gstreamer-video-1.0',
     method : 'pkg-config')
 
 subdir('videoeffects')
+subdir('webrtc')
